@@ -15,23 +15,30 @@ function RecipeScreen({ recipe, pantry, onBack, onCook, onEdit, onAddToShopping,
 
   return (
     <div>
-      <div style={{ position: 'relative' }}>
-        <Photo tone={recipe.tone} ratio="4 / 3" image={recipe.photo} label={recipe.id} style={{ width: '100%' }}/>
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '8px 16px', paddingTop: 'max(8px, env(safe-area-inset-top, 8px))',
+        background: 'rgba(244, 237, 228, 0.94)', backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid var(--hair)',
+      }}>
         <button type="button" onClick={onBack} style={{
-          all: 'unset', cursor: 'pointer', position: 'absolute', top: 'max(12px, env(safe-area-inset-top, 12px))', left: 16,
-          width: 36, height: 36, borderRadius: '50%',
-          background: 'rgba(251, 246, 238, 0.9)', backdropFilter: 'blur(10px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}><SIcon name="arrow-l" size={16}/></button>
+          all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+          height: 40, padding: '0 4px', color: 'var(--ink)', fontSize: 13.5,
+        }}>
+          <SIcon name="arrow-l" size={18}/> volver
+        </button>
         {!recipe.isSeed && (
-          <div style={{ position: 'absolute', top: 'max(12px, env(safe-area-inset-top, 12px))', right: 16, display: 'flex', gap: 8 }}>
-            <button type="button" onClick={onEdit} style={{
-              all: 'unset', cursor: 'pointer', width: 36, height: 36, borderRadius: '50%',
-              background: 'rgba(251, 246, 238, 0.9)', backdropFilter: 'blur(10px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}><SIcon name="edit" size={14}/></button>
-          </div>
+          <button type="button" onClick={onEdit} style={{
+            all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+            height: 40, padding: '0 4px', color: 'var(--ink)', fontSize: 13.5,
+          }}>
+            editar <SIcon name="edit" size={14}/>
+          </button>
         )}
+      </div>
+      <div>
+        <Photo tone={recipe.tone} ratio="4 / 3" image={recipe.photo} label={recipe.title} style={{ width: '100%' }}/>
       </div>
 
       <div style={{ padding: '20px 20px 32px' }}>
@@ -215,7 +222,7 @@ function MineScreen({ recipes, onOpenRecipe, onNew, onImport }) {
           {list.map(r => (
             <button key={r.id} type="button" onClick={() => onOpenRecipe(r)} style={{ all: 'unset', cursor: 'pointer' }}>
               <div style={{ borderRadius: 'var(--r-1)', overflow: 'hidden', marginBottom: 8 }}>
-                <Photo tone={r.tone} image={r.photo} label={r.id} ratio="1 / 1"/>
+                <Photo tone={r.tone} image={r.photo} label={r.title} ratio="1 / 1"/>
               </div>
               <div className="serif" style={{ fontSize: 14, lineHeight: 1.2, marginBottom: 3 }}>{r.title}</div>
               <div style={{ fontSize: 10.5, color: 'var(--soft)' }}><SIcon name="clock" size={10}/> {r.time}m · {r.difficulty}</div>

@@ -101,7 +101,6 @@ function HomeScreen({ recipes, pantryCount, onOpenRecipe, onTab, greet }) {
       </div>
 
       <div style={{ position: 'relative', marginBottom: 20 }}>
-        <SIcon name="search" size={15} stroke="var(--mute)"/>
         <input className="input" placeholder="buscar receta o ingrediente…" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 38 }}/>
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><SIcon name="search" size={15} stroke="var(--mute)"/></span>
       </div>
@@ -124,7 +123,7 @@ function HomeScreen({ recipes, pantryCount, onOpenRecipe, onTab, greet }) {
       {!q && featured && (
         <button type="button" onClick={() => onOpenRecipe(featured)} style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%', marginBottom: 28, boxSizing: 'border-box' }}>
           <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--terracotta)' }}>destacada</div>
-          <Photo tone={featured.tone} ratio="4 / 3" image={featured.photo} label={featured.id} style={{ borderRadius: 'var(--r-2)', marginBottom: 12 }}/>
+          <Photo tone={featured.tone} ratio="4 / 3" image={featured.photo} label={featured.title} style={{ borderRadius: 'var(--r-2)', marginBottom: 12 }}/>
           <h3 className="serif" style={{ fontSize: 22, lineHeight: 1.15, marginBottom: 6 }}>{featured.title}</h3>
           <div style={{ fontSize: 11.5, color: 'var(--soft)', display: 'flex', gap: 12 }}>
             <span><SIcon name="clock" size={11}/> {featured.time}m</span>
@@ -141,7 +140,7 @@ function HomeScreen({ recipes, pantryCount, onOpenRecipe, onTab, greet }) {
             all: 'unset', cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'center',
           }}>
             <div style={{ width: 88, height: 88, flexShrink: 0, borderRadius: 'var(--r-1)', overflow: 'hidden' }}>
-              <Photo tone={r.tone} image={r.photo} label={r.id} style={{ width: '100%', height: '100%', aspectRatio: 'auto', padding: 0 }}/>
+              <Photo tone={r.tone} image={r.photo} label={r.title} style={{ width: '100%', height: '100%', aspectRatio: 'auto', padding: 0 }}/>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="eyebrow" style={{ marginBottom: 2 }}>{(r.tags||[])[0] || ''}</div>
@@ -220,7 +219,7 @@ function PantryScreen({ recipes, pantry, setPantry, onOpenRecipe }) {
             background: 'var(--paper)', borderRadius: 'var(--r-2)', border: '1px solid var(--hair)',
           }}>
             <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: 'var(--r-1)', overflow: 'hidden' }}>
-              <Photo tone={r.tone} image={r.photo} label={r.id} style={{ width: '100%', height: '100%', aspectRatio: 'auto', padding: 0 }}/>
+              <Photo tone={r.tone} image={r.photo} label={r.title} style={{ width: '100%', height: '100%', aspectRatio: 'auto', padding: 0 }}/>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ marginBottom: 4 }}><MatchBadge match={match}/></div>

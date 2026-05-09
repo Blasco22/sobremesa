@@ -56,14 +56,18 @@ function App() {
 
   const signIn = async () => {
     setAuthBusy(true);
+    localStorage.removeItem('sobremesa.guest');
     try {
-      localStorage.removeItem('sobremesa.guest');
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+      if (isMobile) {
+        await window.FB.signInWithRedirect(window.FB.auth, window.FB.googleProvider);
+        return; // page navigates away
+      }
       await window.FB.signInWithPopup(window.FB.auth, window.FB.googleProvider);
     } catch (e) {
       console.error(e);
-      // popup blocked → redirect
       try { await window.FB.signInWithRedirect(window.FB.auth, window.FB.googleProvider); }
-      catch (e2) { flash('No se pudo iniciar sesión'); }
+      catch { flash('No se pudo iniciar sesión'); }
     } finally { setAuthBusy(false); }
   };
   const guestMode = () => { localStorage.setItem('sobremesa.guest', '1'); setUser(null); };
