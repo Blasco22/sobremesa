@@ -1,4 +1,5 @@
 // app-core.js · helpers, store, icons, parser. No JSX in this file (loaded as plain JS).
+(function () {
 const SEED_RECIPES = [
   {
     id: 'seed-tortilla', title: 'Tortilla de patata jugosa', tone: 'warm',
@@ -205,3 +206,4 @@ async function compressImage(file, maxDim = 800, quality = 0.78) {
 }
 
 window.SOBREMESA = { SEED_RECIPES, PANTRY_CATEGORIES, makeStore, parseRecipeMarkdown, compressImage, classifyIngredient };
+})();
