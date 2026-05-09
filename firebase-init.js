@@ -7,10 +7,6 @@ import {
 import {
   getFirestore, doc, setDoc, getDoc, deleteDoc, collection, onSnapshot, query, orderBy, serverTimestamp, writeBatch,
 } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
-import {
-  getStorage, ref, uploadString, getDownloadURL,
-} from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js';
-
 const firebaseConfig = {
   apiKey: 'AIzaSyCdWC4htyyJC3b_V2LDnk_UbxzSHpWDvRk',
   authDomain: 'sobremesa-af74f.firebaseapp.com',
@@ -23,13 +19,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
 window.FB = {
-  auth, db, storage, googleProvider,
+  auth, db, storage: null, googleProvider,
   signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut,
   doc, setDoc, getDoc, deleteDoc, collection, onSnapshot, query, orderBy, serverTimestamp, writeBatch,
-  ref, uploadString, getDownloadURL,
 };
 window.dispatchEvent(new Event('fb-ready'));
+
+// Storage se carga aparte para que un fallo no bloquee la app
+import('https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js')
+  .then(({ getStorage, ref, uploadString, getDownloadURL }) => {
+    window.FB.storage = getStorage(app);
+    window.FB.ref = ref;
+    window.FB.uploadString = uploadString;
+    window.FB.getDownloadURL = getDownloadURL;
+  })
+  .catch(() => {});
