@@ -29,7 +29,9 @@ function App() {
   // Auth boot
   uE(() => {
     const ready = () => {
-      window.FB.getRedirectResult(window.FB.auth).catch(() => {});
+      window.FB.getRedirectResult(window.FB.auth).catch((e) => {
+        if (e.code !== 'auth/no-current-user') setAuthError(`${e.code}: ${e.message}`);
+      });
       window.FB.onAuthStateChanged(window.FB.auth, (u) => {
         if (u) {
           setUser(u);
@@ -68,15 +70,18 @@ function App() {
     setAuthError('');
     localStorage.removeItem('sobremesa.guest');
     try {
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
-      if (isMobile) {
-        await window.FB.signInWithRedirect(window.FB.auth, window.FB.googleProvider);
-        return;
-      }
       await window.FB.signInWithPopup(window.FB.auth, window.FB.googleProvider);
     } catch (e) {
       console.error('Auth error:', e.code, e.message);
-      setAuthError(`${e.code || 'error'}: ${e.message}`);
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+        try {
+          await window.FB.signInWithRedirect(window.FB.auth, window.FB.googleProvider);
+        } catch (e2) {
+          setAuthError(`${e2.code || 'error'}: ${e2.message}`);
+        }
+      } else {
+        setAuthError(`${e.code || 'error'}: ${e.message}`);
+      }
     } finally { setAuthBusy(false); }
   };
   const guestMode = () => { localStorage.setItem('sobremesa.guest', '1'); setUser(null); };
