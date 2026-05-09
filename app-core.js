@@ -205,13 +205,8 @@ async function compressImage(file, maxDim = 800, quality = 0.78) {
   return c.toDataURL('image/jpeg', quality);
 }
 
-async function uploadPhoto(dataURL, uid) {
-  if (!uid || !window.FB?.storage) return dataURL;
-  const FB = window.FB;
-  const path = `users/${uid}/photos/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
-  const storageRef = FB.ref(FB.storage, path);
-  await FB.uploadString(storageRef, dataURL, 'data_url');
-  return await FB.getDownloadURL(storageRef);
+async function uploadPhoto(dataURL) {
+  return dataURL;
 }
 
 function scaleQty(qty, scale) {

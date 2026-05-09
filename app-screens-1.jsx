@@ -53,7 +53,7 @@ const Brand = ({ size = 22 }) => (
 );
 
 // ─── Auth screen ─────────────────────────────────────────────────────────────
-function AuthScreen({ onGuest, onSignIn, busy }) {
+function AuthScreen({ onGuest, onSignIn, busy, error }) {
   return (
     <div className="auth-screen safe-top">
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '40px 0' }}>
@@ -63,6 +63,11 @@ function AuthScreen({ onGuest, onSignIn, busy }) {
         </p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {error && (
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#c0392b', background: '#fdf0ee', border: '1px solid #f5c6c2', borderRadius: 8, padding: '10px 14px', wordBreak: 'break-all' }}>
+            {error}
+          </p>
+        )}
         <button type="button" onClick={onSignIn} disabled={busy} className="btn lg full" style={{ background: '#fff', color: '#1a1a1a', border: '1px solid var(--hair)', boxShadow: '0 1px 0 rgba(0,0,0,0.04)' }}>
           {busy ? <span className="spinner"/> : <SIcon name="user" size={16} stroke="#4285F4"/>}
           continuar con Google

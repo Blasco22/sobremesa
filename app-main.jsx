@@ -7,6 +7,7 @@ const { RecipeScreen, CookScreen, MineScreen, ShoppingScreen, EditScreen, Import
 function App() {
   const [user, setUser] = uS(undefined); // undefined = loading, null = guest, obj = logged
   const [authBusy, setAuthBusy] = uS(false);
+  const [authError, setAuthError] = uS('');
   const [route, setRoute] = uS({ tab: 'home' }); // {tab, recipe?, mode?}
   const [recipes, setRecipes] = uS([]);
   const [pantry, setPantry] = uS([]);
@@ -64,18 +65,18 @@ function App() {
 
   const signIn = async () => {
     setAuthBusy(true);
+    setAuthError('');
     localStorage.removeItem('sobremesa.guest');
     try {
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
       if (isMobile) {
         await window.FB.signInWithRedirect(window.FB.auth, window.FB.googleProvider);
-        return; // page navigates away
+        return;
       }
       await window.FB.signInWithPopup(window.FB.auth, window.FB.googleProvider);
     } catch (e) {
-      console.error(e);
-      try { await window.FB.signInWithRedirect(window.FB.auth, window.FB.googleProvider); }
-      catch { flash('No se pudo iniciar sesión'); }
+      console.error('Auth error:', e.code, e.message);
+      setAuthError(`${e.code || 'error'}: ${e.message}`);
     } finally { setAuthBusy(false); }
   };
   const guestMode = () => { localStorage.setItem('sobremesa.guest', '1'); setUser(null); };
@@ -106,8 +107,7 @@ function App() {
   };
   const uploadPhoto = async (file) => {
     const dataURL = await window.SOBREMESA.compressImage(file);
-    if (storeRef.current?.isGuest || !user) return dataURL;
-    return await window.SOBREMESA.uploadPhoto(dataURL, user.uid);
+    return await window.SOBREMESA.uploadPhoto(dataURL);
   };
 
   const onAddToShopping = (items) => {
@@ -132,7 +132,7 @@ function App() {
     return <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner"/></div>;
   }
   if (user === false) {
-    return <AuthScreen onGuest={guestMode} onSignIn={signIn} busy={authBusy}/>;
+    return <AuthScreen onGuest={guestMode} onSignIn={signIn} busy={authBusy} error={authError}/>;
   }
 
   // Modal screens (cook, edit, import, settings) take full layer
