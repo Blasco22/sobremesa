@@ -13,9 +13,17 @@ function App() {
   const [shopping, setShopping] = uS([]);
   const [toast, setToast] = uS('');
   const [installEvt, setInstallEvt] = uS(null);
+  const [darkMode, setDarkMode] = uS(() => localStorage.getItem('sobremesa.dark') === '1');
   const storeRef = uR(null);
 
   const flash = (m) => { setToast(m); setTimeout(() => setToast(''), 2400); };
+
+  // Dark mode
+  uE(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('sobremesa.dark', darkMode ? '1' : '0');
+  }, [darkMode]);
+  const toggleDark = () => setDarkMode(d => !d);
 
   // Auth boot
   uE(() => {
@@ -96,6 +104,12 @@ function App() {
     setRoute({ tab: 'mine' });
     flash('receta eliminada');
   };
+  const uploadPhoto = async (file) => {
+    const dataURL = await window.SOBREMESA.compressImage(file);
+    if (storeRef.current?.isGuest || !user) return dataURL;
+    return await window.SOBREMESA.uploadPhoto(dataURL, user.uid);
+  };
+
   const onAddToShopping = (items) => {
     const cur = shopping.slice();
     items.forEach(it => {
@@ -126,13 +140,13 @@ function App() {
     return <CookScreen recipe={route.recipe} onExit={() => setRoute({ ...route, mode: 'view' })}/>;
   }
   if (route.mode === 'edit') {
-    return <EditScreen initial={route.recipe} onSave={onSaveRecipe} onCancel={back}/>;
+    return <EditScreen initial={route.recipe} onSave={onSaveRecipe} onCancel={back} onUploadPhoto={uploadPhoto}/>;
   }
   if (route.mode === 'import') {
-    return <ImportScreen onParsed={onSaveRecipe} onCancel={back}/>;
+    return <ImportScreen onParsed={onSaveRecipe} onCancel={back} onUploadPhoto={uploadPhoto}/>;
   }
   if (route.mode === 'settings') {
-    return <SettingsScreen user={user} isGuest={!user} recipes={recipes} onLogout={logout} onBack={back} onSignIn={signIn}/>;
+    return <SettingsScreen user={user} isGuest={!user} recipes={recipes} onLogout={logout} onBack={back} onSignIn={signIn} darkMode={darkMode} toggleDark={toggleDark}/>;
   }
 
   // Recipe detail (view)
@@ -148,6 +162,7 @@ function App() {
             onEdit={() => setRoute({ ...route, mode: 'edit' })}
             onAddToShopping={onAddToShopping}
             onDelete={() => onDeleteRecipe(route.recipe.id)}
+            onFlash={flash}
           />
         </div>
         {toast && <div className={`toast on`}>{toast}</div>}

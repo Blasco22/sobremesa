@@ -21,6 +21,18 @@
   --r-3: 24px;
 }
 
+html.dark {
+  --cream: #1a1612;
+  --paper: #221e18;
+  --paper-2: #2b251e;
+  --ink: #f0e8da;
+  --ink-2: #cfc5b5;
+  --soft: #9a8b78;
+  --mute: #5a4e3e;
+  --hair: #2e2820;
+  --hair-2: #38302a;
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--ink); }
 body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }

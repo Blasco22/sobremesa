@@ -205,5 +205,26 @@ async function compressImage(file, maxDim = 800, quality = 0.78) {
   return c.toDataURL('image/jpeg', quality);
 }
 
-window.SOBREMESA = { SEED_RECIPES, PANTRY_CATEGORIES, makeStore, parseRecipeMarkdown, compressImage, classifyIngredient };
+async function uploadPhoto(dataURL, uid) {
+  if (!uid || !window.FB?.storage) return dataURL;
+  const FB = window.FB;
+  const path = `users/${uid}/photos/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+  const storageRef = FB.ref(FB.storage, path);
+  await FB.uploadString(storageRef, dataURL, 'data_url');
+  return await FB.getDownloadURL(storageRef);
+}
+
+function scaleQty(qty, scale) {
+  if (!qty || scale === 1) return qty;
+  const m = qty.match(/^(\d+(?:[.,]\d+)?(?:\/\d+)?)(.*)/);
+  if (!m) return qty;
+  let num = m[1].includes('/')
+    ? m[1].split('/').reduce((a, b) => parseFloat(a) / parseFloat(b))
+    : parseFloat(m[1].replace(',', '.'));
+  const scaled = num * scale;
+  const str = Number.isInteger(scaled) ? String(scaled) : String(Math.round(scaled * 10) / 10).replace('.', ',');
+  return str + m[2];
+}
+
+window.SOBREMESA = { SEED_RECIPES, PANTRY_CATEGORIES, makeStore, parseRecipeMarkdown, compressImage, uploadPhoto, scaleQty, classifyIngredient };
 })();

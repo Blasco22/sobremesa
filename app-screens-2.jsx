@@ -1,17 +1,27 @@
 // app-screens-2.jsx · recipe detail, cook mode, mine, shopping, create, import, settings
 const { useState: u2State, useEffect: u2Effect, useRef: u2Ref, useMemo: u2Memo } = React;
 const { SIcon, Photo, MatchBadge, Brand } = window.SCREENS_1;
-const { PANTRY_CATEGORIES, parseRecipeMarkdown, compressImage, classifyIngredient } = window.SOBREMESA;
+const { PANTRY_CATEGORIES, parseRecipeMarkdown, compressImage, uploadPhoto, scaleQty, classifyIngredient } = window.SOBREMESA;
 
 // ─── Recipe detail ───────────────────────────────────────────────────────────
-function RecipeScreen({ recipe, pantry, onBack, onCook, onEdit, onAddToShopping, onDelete }) {
+function RecipeScreen({ recipe, pantry, onBack, onCook, onEdit, onAddToShopping, onDelete, onFlash }) {
   const [tab, setTab] = u2State('ing');
+  const [scale, setScale] = u2State(1);
   const matchFor = () => {
     const t = recipe.ingredients?.length || 1;
     const h = (recipe.ingredients || []).filter(ing => pantry.some(p => ing.name.toLowerCase().includes(p.toLowerCase()))).length;
     return Math.round((h / t) * 100);
   };
   const missing = (recipe.ingredients || []).filter(ing => !pantry.some(p => ing.name.toLowerCase().includes(p.toLowerCase())));
+  const shareRecipe = async () => {
+    const lines = (recipe.ingredients || []).map(i => `• ${i.qty ? i.qty + ' ' : ''}${i.name}`).join('\n');
+    const text = `${recipe.title}\n\n${recipe.blurb ? recipe.blurb + '\n\n' : ''}⏱ ${recipe.time}min · ${recipe.servings} pers.\n\nIngredientes:\n${lines}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: recipe.title, text }); } catch {}
+    } else {
+      try { await navigator.clipboard.writeText(text); onFlash?.('¡receta copiada!'); } catch {}
+    }
+  };
 
   return (
     <div>
@@ -45,9 +55,17 @@ function RecipeScreen({ recipe, pantry, onBack, onCook, onEdit, onAddToShopping,
         <div style={{ display: 'flex', gap: 16, padding: '14px 0', borderTop: '1px solid var(--hair-2)', borderBottom: '1px solid var(--hair-2)', marginBottom: 18, alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ fontSize: 12, color: 'var(--ink-2)' }}><SIcon name="clock" size={12} stroke="var(--soft)"/> {recipe.time} min</span>
           <span style={{ fontSize: 12, color: 'var(--ink-2)' }}><SIcon name="chef" size={12} stroke="var(--soft)"/> {recipe.difficulty}</span>
-          <span style={{ fontSize: 12, color: 'var(--ink-2)' }}><SIcon name="user" size={12} stroke="var(--soft)"/> {recipe.servings} pers.</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <SIcon name="user" size={12} stroke="var(--soft)"/>
+            <button type="button" onClick={() => setScale(s => Math.max(1, s - 1))} style={{ all: 'unset', cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: '1px solid var(--hair)', fontSize: 14, color: 'var(--soft)' }}>−</button>
+            <span style={{ fontSize: 12, color: 'var(--ink-2)', minWidth: 48, textAlign: 'center' }}>{recipe.servings * scale} pers.</span>
+            <button type="button" onClick={() => setScale(s => Math.min(10, s + 1))} style={{ all: 'unset', cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: '1px solid var(--hair)', fontSize: 14, color: 'var(--soft)' }}>+</button>
+          </div>
           <div style={{ flex: 1 }}/>
           <MatchBadge match={matchFor()}/>
+          <button type="button" onClick={shareRecipe} style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: '50%', border: '1px solid var(--hair)' }}>
+            <SIcon name="upload" size={13} stroke="var(--soft)"/>
+          </button>
         </div>
 
         <button type="button" className="btn lg terracotta full" onClick={onCook} style={{ marginBottom: 14 }}>
@@ -77,7 +95,7 @@ function RecipeScreen({ recipe, pantry, onBack, onCook, onEdit, onAddToShopping,
               const have = pantry.some(p => ing.name.toLowerCase().includes(p.toLowerCase()));
               return (
                 <li key={i} style={{ display: 'flex', gap: 12, padding: '11px 0', borderBottom: '1px solid var(--hair-2)', fontSize: 14, alignItems: 'center' }}>
-                  <span className="mono" style={{ width: 86, color: 'var(--soft)', fontSize: 11, flexShrink: 0 }}>{ing.qty || '—'}</span>
+                  <span className="mono" style={{ width: 86, color: 'var(--soft)', fontSize: 11, flexShrink: 0 }}>{scaleQty(ing.qty, scale) || '—'}</span>
                   <span style={{ flex: 1 }}>{ing.name}{ing.note && <span style={{ color: 'var(--soft)' }}> · {ing.note}</span>}</span>
                   {have ? <SIcon name="check" size={13} stroke="var(--oliva)"/> : <SIcon name="cart" size={12} stroke="var(--terracotta)"/>}
                 </li>
@@ -116,12 +134,26 @@ function CookScreen({ recipe, onExit }) {
   const cur = recipe.steps?.[step] || {};
   const [timer, setTimer] = u2State(cur.timer ? cur.timer * 60 : null);
   const [running, setRunning] = u2State(false);
+  const hiddenAt = u2Ref(null);
   u2Effect(() => { setTimer(cur.timer ? cur.timer * 60 : null); setRunning(false); }, [step]);
   u2Effect(() => {
     if (!running || timer == null) return;
     const t = setInterval(() => setTimer(s => Math.max(0, (s || 0) - 1)), 1000);
     return () => clearInterval(t);
   }, [running, timer]);
+  u2Effect(() => {
+    const onVis = () => {
+      if (document.hidden) {
+        hiddenAt.current = Date.now();
+      } else if (hiddenAt.current && running) {
+        const elapsed = Math.round((Date.now() - hiddenAt.current) / 1000);
+        setTimer(s => s != null ? Math.max(0, s - elapsed) : s);
+        hiddenAt.current = null;
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [running]);
   const fmt = (s) => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 
   return (
@@ -303,16 +335,20 @@ function ShoppingScreen({ shopping, setShopping }) {
 }
 
 // ─── Create / edit recipe ────────────────────────────────────────────────────
-function EditScreen({ initial, onSave, onCancel }) {
+function EditScreen({ initial, onSave, onCancel, onUploadPhoto }) {
   const [r, setR] = u2State(initial || {
     id: 'r-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
     title: '', tone: 'warm', servings: 4, time: 30, difficulty: 'fácil', tags: [], ingredients: [{qty:'', name:''}], steps: [{title:'', body:'', timer: null}], blurb: '', photo: null,
   });
+  const [uploading, setUploading] = u2State(false);
   const setF = (k, v) => setR(x => ({ ...x, [k]: v }));
   const onPhoto = async (e) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const data = await compressImage(f);
-    setF('photo', data);
+    setUploading(true);
+    try {
+      const url = onUploadPhoto ? await onUploadPhoto(f) : await compressImage(f);
+      setF('photo', url);
+    } finally { setUploading(false); }
   };
   const updIng = (i, k, v) => setF('ingredients', r.ingredients.map((x, j) => j === i ? { ...x, [k]: v } : x));
   const addIng = () => setF('ingredients', [...r.ingredients, { qty: '', name: '' }]);
@@ -331,7 +367,11 @@ function EditScreen({ initial, onSave, onCancel }) {
       <div style={{ padding: 20 }}>
         <label className="label">foto</label>
         <label style={{ display: 'block', marginBottom: 16, cursor: 'pointer' }}>
-          {r.photo ? (
+          {uploading ? (
+            <div className={`photo t-${r.tone}`} style={{ borderRadius: 'var(--r-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span className="spinner"/>
+            </div>
+          ) : r.photo ? (
             <div style={{ position: 'relative', borderRadius: 'var(--r-2)', overflow: 'hidden', aspectRatio: '4 / 3' }}>
               <img src={r.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
               <span style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>
@@ -395,7 +435,7 @@ function EditScreen({ initial, onSave, onCancel }) {
 }
 
 // ─── Import recipe ───────────────────────────────────────────────────────────
-function ImportScreen({ onParsed, onCancel }) {
+function ImportScreen({ onParsed, onCancel, onUploadPhoto }) {
   const [text, setText] = u2State('');
   const [photo, setPhoto] = u2State(null);
   const sample = `---
@@ -420,7 +460,11 @@ tags: ejemplo
 una descripción breve aquí.`;
   const onFile = async (e) => {
     const f = e.target.files?.[0]; if (!f) return;
-    if (f.type.startsWith('image/')) { setPhoto(await compressImage(f)); return; }
+    if (f.type.startsWith('image/')) {
+      const url = onUploadPhoto ? await onUploadPhoto(f) : await compressImage(f);
+      setPhoto(url);
+      return;
+    }
     const txt = await f.text();
     setText(txt);
   };
@@ -472,7 +516,7 @@ una descripción breve aquí.`;
 }
 
 // ─── Settings ────────────────────────────────────────────────────────────────
-function SettingsScreen({ user, onLogout, onBack, recipes, isGuest, onSignIn }) {
+function SettingsScreen({ user, onLogout, onBack, recipes, isGuest, onSignIn, darkMode, toggleDark }) {
   const exportAll = () => {
     const data = JSON.stringify(recipes, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -514,6 +558,23 @@ function SettingsScreen({ user, onLogout, onBack, recipes, isGuest, onSignIn }) 
             entrar con Google
           </button>
         )}
+
+        <div className="eyebrow" style={{ marginTop: 24, marginBottom: 8 }}>apariencia</div>
+        <div style={{ display: 'flex', alignItems: 'center', height: 48, gap: 12, padding: '0 2px', marginBottom: 8 }}>
+          <SIcon name="sparkle" size={14} stroke="var(--soft)"/>
+          <span style={{ flex: 1, fontSize: 14 }}>modo oscuro</span>
+          <button type="button" onClick={toggleDark} style={{
+            all: 'unset', cursor: 'pointer', width: 44, height: 26, borderRadius: 999,
+            background: darkMode ? 'var(--terracotta)' : 'var(--hair)',
+            position: 'relative', transition: 'background 200ms',
+          }}>
+            <span style={{
+              position: 'absolute', top: 3, left: darkMode ? 21 : 3,
+              width: 20, height: 20, borderRadius: '50%', background: '#fff',
+              transition: 'left 200ms', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+            }}/>
+          </button>
+        </div>
 
         <div className="eyebrow" style={{ marginTop: 24, marginBottom: 8 }}>tus datos</div>
         <button type="button" onClick={exportAll} className="btn full ghost" style={{ marginBottom: 8, justifyContent: 'flex-start', height: 48 }}>
