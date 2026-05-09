@@ -127,6 +127,31 @@ function RecipeScreen({ recipe, pantry, onBack, onCook, onEdit, onAddToShopping,
   );
 }
 
+// ─── Cook mode helpers ────────────────────────────────────────────────────────
+function playAlarm() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const beep = (freq, start, dur) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.6, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur + 0.05);
+    };
+    beep(880, 0, 0.25); beep(880, 0.3, 0.25); beep(1100, 0.6, 0.5);
+  } catch {}
+}
+function vibrateAlarm() {
+  try { navigator.vibrate?.([300, 100, 300, 100, 600]); } catch {}
+}
+function fireNotif(stepTitle) {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  try { new Notification('⏱ ¡Tiempo!', { body: stepTitle, icon: '/icons/icon-192.png', silent: false }); } catch {}
+}
+
 // ─── Cook mode ───────────────────────────────────────────────────────────────
 function CookScreen({ recipe, onExit }) {
   const [step, setStep] = u2State(0);
@@ -135,12 +160,31 @@ function CookScreen({ recipe, onExit }) {
   const [timer, setTimer] = u2State(cur.timer ? cur.timer * 60 : null);
   const [running, setRunning] = u2State(false);
   const hiddenAt = u2Ref(null);
+
+  // Pedir permiso de notificación al entrar en modo cocina
+  u2Effect(() => {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
   u2Effect(() => { setTimer(cur.timer ? cur.timer * 60 : null); setRunning(false); }, [step]);
   u2Effect(() => {
-    if (!running || timer == null) return;
+    if (!running || timer == null || timer === 0) return;
     const t = setInterval(() => setTimer(s => Math.max(0, (s || 0) - 1)), 1000);
     return () => clearInterval(t);
   }, [running, timer]);
+
+  // Alarma cuando timer llega a 0
+  u2Effect(() => {
+    if (timer === 0 && running) {
+      setRunning(false);
+      playAlarm();
+      vibrateAlarm();
+      fireNotif(cur.title);
+    }
+  }, [timer]);
+
   u2Effect(() => {
     const onVis = () => {
       if (document.hidden) {
@@ -182,14 +226,27 @@ function CookScreen({ recipe, onExit }) {
         <h1 className="serif" style={{ fontSize: 36, lineHeight: 1.08, letterSpacing: '-0.02em', marginBottom: 18 }}>{cur.title}</h1>
         <p style={{ fontSize: 16.5, lineHeight: 1.55, color: 'rgba(244, 237, 228, 0.85)', textWrap: 'pretty', marginBottom: 24 }}>{cur.body}</p>
         {timer != null && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'rgba(244, 237, 228, 0.06)', borderRadius: 'var(--r-2)' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 'var(--r-2)',
+            background: timer === 0 ? 'rgba(184,74,55,0.25)' : 'rgba(244, 237, 228, 0.06)',
+            transition: 'background 0.4s',
+          }}>
             {running && <span className="live-dot"/>}
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 28, fontVariantNumeric: 'tabular-nums' }}>{fmt(timer)}</div>
+            {timer === 0 && <span style={{ fontSize: 18 }}>🔔</span>}
+            <div style={{
+              fontFamily: 'var(--mono)', fontSize: 28, fontVariantNumeric: 'tabular-nums',
+              color: timer === 0 ? 'var(--terracotta)' : 'inherit',
+            }}>{fmt(timer)}</div>
             <div style={{ flex: 1 }}/>
-            <button type="button" onClick={() => setRunning(r => !r)} style={{
+            <button type="button" onClick={() => {
+              if (timer === 0) { setTimer(cur.timer ? cur.timer * 60 : null); }
+              else { setRunning(r => !r); }
+            }} style={{
               all: 'unset', cursor: 'pointer', width: 38, height: 38, borderRadius: '50%',
               background: 'var(--terracotta)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}><SIcon name={running ? 'pause' : 'play'} size={14} stroke="#fff"/></button>
+            }}>
+              <SIcon name={timer === 0 ? 'timer' : running ? 'pause' : 'play'} size={14} stroke="#fff"/>
+            </button>
           </div>
         )}
       </div>
