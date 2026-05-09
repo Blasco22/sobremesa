@@ -1,0 +1,259 @@
+/* Sobremesa · Design tokens
+   Warm pop · cream + terracotta + oliva
+   Type: Instrument Serif (display) / Helvetica Neue stack (UI) / IBM Plex Mono (labels)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Surfaces */
+  --cream: #f4ede4;
+  --paper: #fbf6ee;
+  --paper-2: #f8f1e6;
+  --ink: #1a1612;
+  --ink-2: #3a322a;
+  --soft: #6b5d4a;
+  --mute: #a39685;
+  --hair: rgba(26, 22, 18, 0.10);
+  --hair-2: rgba(26, 22, 18, 0.06);
+
+  /* Accents */
+  --terracotta: #c8593a;
+  --terracotta-2: #a8472d;
+  --oliva: #7a8259;
+  --mostaza: #c89a3a;
+
+  /* Type */
+  --serif: 'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Helvetica Neue', 'Söhne', 'Inter', system-ui, -apple-system, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  /* Radii — slim, moderno fino */
+  --r-1: 4px;
+  --r-2: 10px;
+  --r-3: 16px;
+  --r-pill: 999px;
+
+  /* Spacing scale */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+}
+
+/* Dark herbal alt mode (toggled via class on root) */
+.theme-herbal {
+  --cream: #15181410;
+  --paper: #1a1f1a;
+  --paper-2: #1f261f;
+  --ink: #ecede4;
+  --ink-2: #c8cab9;
+  --soft: #8e9783;
+  --mute: #5e6857;
+  --hair: rgba(236, 237, 228, 0.10);
+  --hair-2: rgba(236, 237, 228, 0.05);
+  --terracotta: #c87a5a;
+  --terracotta-2: #b06346;
+  --oliva: #a8c98f;
+}
+
+.sobremesa {
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.sobremesa, .sobremesa * { box-sizing: border-box; }
+
+/* Reset for prototypes */
+.sobremesa button { font-family: inherit; cursor: pointer; }
+.sobremesa input, .sobremesa textarea { font-family: inherit; color: inherit; }
+.sobremesa h1, .sobremesa h2, .sobremesa h3, .sobremesa h4, .sobremesa p { margin: 0; }
+.sobremesa a { color: inherit; text-decoration: none; }
+.sobremesa ul, .sobremesa ol { margin: 0; padding: 0; list-style: none; }
+
+/* Serif display utility */
+.s-serif { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; }
+.s-italic { font-style: italic; }
+.s-mono { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* Hairline rules */
+.s-rule { height: 1px; background: var(--hair); }
+.s-rule-strong { height: 1px; background: var(--ink); }
+
+/* Placeholder photo — tonal stripes + mono label */
+.s-photo-ph {
+  position: relative;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(200, 89, 58, 0.08) 0,
+      rgba(200, 89, 58, 0.08) 1px,
+      rgba(200, 89, 58, 0.0) 1px,
+      rgba(200, 89, 58, 0.0) 9px
+    ),
+    linear-gradient(160deg, #efe4d2 0%, #e4d6bf 100%);
+  color: var(--soft);
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 12px 14px;
+  overflow: hidden;
+}
+.s-photo-ph .lbl {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  background: rgba(251, 246, 238, 0.85);
+  padding: 4px 8px;
+  border-radius: 2px;
+  color: var(--ink-2);
+}
+.s-photo-ph.tone-oliva {
+  background:
+    repeating-linear-gradient(135deg, rgba(122, 130, 89, 0.10) 0, rgba(122, 130, 89, 0.10) 1px, transparent 1px, transparent 9px),
+    linear-gradient(160deg, #e8eadc 0%, #d6dcc4 100%);
+}
+.s-photo-ph.tone-mostaza {
+  background:
+    repeating-linear-gradient(135deg, rgba(200, 154, 58, 0.10) 0, rgba(200, 154, 58, 0.10) 1px, transparent 1px, transparent 9px),
+    linear-gradient(160deg, #f0e4c4 0%, #e4d4a4 100%);
+}
+.s-photo-ph.tone-rosa {
+  background:
+    repeating-linear-gradient(135deg, rgba(200, 89, 58, 0.10) 0, rgba(200, 89, 58, 0.10) 1px, transparent 1px, transparent 9px),
+    linear-gradient(160deg, #f3dccf 0%, #e8c4b0 100%);
+}
+.s-photo-ph.tone-tinta {
+  background:
+    repeating-linear-gradient(135deg, rgba(26, 22, 18, 0.06) 0, rgba(26, 22, 18, 0.06) 1px, transparent 1px, transparent 9px),
+    linear-gradient(160deg, #d8cdb9 0%, #b8ad99 100%);
+}
+.s-photo-ph.tone-cream {
+  background:
+    repeating-linear-gradient(135deg, rgba(26, 22, 18, 0.04) 0, rgba(26, 22, 18, 0.04) 1px, transparent 1px, transparent 9px),
+    linear-gradient(160deg, #f6efe2 0%, #ebe0cb 100%);
+}
+
+/* Chips */
+.s-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  font-size: 12.5px; color: var(--ink-2);
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.s-chip:hover { border-color: var(--ink); }
+.s-chip.is-on {
+  background: var(--ink); color: var(--paper); border-color: var(--ink);
+}
+.s-chip.is-on .x { color: var(--paper); opacity: 0.7; }
+.s-chip .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--terracotta);
+}
+.s-chip .x {
+  margin-left: 2px; margin-right: -4px;
+  width: 16px; height: 16px; display: inline-flex;
+  align-items: center; justify-content: center;
+  font-size: 14px; line-height: 1; color: var(--mute);
+  border-radius: 50%;
+}
+
+/* Buttons */
+.s-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 18px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--ink);
+  background: var(--ink); color: var(--paper);
+  font-size: 13.5px; font-weight: 500;
+  letter-spacing: 0.005em;
+  transition: all .15s ease;
+}
+.s-btn:hover { background: var(--ink-2); border-color: var(--ink-2); }
+.s-btn.ghost { background: transparent; color: var(--ink); }
+.s-btn.ghost:hover { background: var(--paper); }
+.s-btn.terracotta { background: var(--terracotta); border-color: var(--terracotta); color: #fff; }
+.s-btn.terracotta:hover { background: var(--terracotta-2); border-color: var(--terracotta-2); }
+.s-btn.sm { height: 32px; padding: 0 12px; font-size: 12.5px; }
+.s-btn.lg { height: 48px; padding: 0 22px; font-size: 14.5px; }
+
+/* Cards */
+.s-card {
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-2);
+  overflow: hidden;
+}
+
+/* Inputs */
+.s-input {
+  width: 100%; height: 40px;
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-1);
+  padding: 0 14px;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s ease;
+}
+.s-input:focus { border-color: var(--ink); }
+.s-textarea {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-1);
+  padding: 12px 14px;
+  font-size: 13.5px; line-height: 1.55;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  font-family: var(--sans);
+}
+.s-textarea.mono { font-family: var(--mono); font-size: 12.5px; line-height: 1.7; }
+.s-textarea:focus { border-color: var(--ink); }
+
+/* Eyebrow */
+.s-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px; letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+/* Numbered step circle */
+.s-step-num {
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 1px solid var(--ink);
+  font-family: var(--serif);
+  font-size: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-style: italic;
+}
+
+/* Scrollbar — keep canvas frames clean */
+.s-scroll { overflow: auto; }
+.s-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.s-scroll::-webkit-scrollbar-thumb { background: var(--hair); border-radius: 3px; }
+.s-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* Subtle shimmer for active states */
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.s-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--terracotta);
+  animation: pulseDot 1.6s ease-in-out infinite;
+}
