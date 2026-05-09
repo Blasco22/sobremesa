@@ -44,7 +44,7 @@ button { font-family: inherit; }
 h1, h2, h3 { margin: 0; font-weight: 400; }
 
 /* Buttons */
-.btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+.btn { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 0 18px; height: 44px; font-size: 13.5px; border-radius: 10px;
   background: var(--ink); color: var(--cream); transition: transform 80ms ease, opacity 100ms; }
 .btn:active { transform: scale(0.98); }

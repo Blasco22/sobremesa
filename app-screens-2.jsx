@@ -15,31 +15,27 @@ function RecipeScreen({ recipe, pantry, onBack, onCook, onEdit, onAddToShopping,
 
   return (
     <div>
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '8px 16px', paddingTop: 'max(8px, env(safe-area-inset-top, 8px))',
-        background: 'rgba(244, 237, 228, 0.94)', backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--hair)',
-      }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 10, height: 0, pointerEvents: 'none' }}>
         <button type="button" onClick={onBack} style={{
-          all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-          height: 40, padding: '0 4px', color: 'var(--ink)', fontSize: 13.5,
-        }}>
-          <SIcon name="arrow-l" size={18}/> volver
-        </button>
+          all: 'unset', cursor: 'pointer', pointerEvents: 'auto',
+          position: 'absolute', top: 'max(12px, env(safe-area-inset-top, 12px))', left: 16,
+          width: 36, height: 36, borderRadius: '50%',
+          background: 'rgba(251, 246, 238, 0.9)', backdropFilter: 'blur(10px)',
+          boxShadow: '0 1px 6px rgba(0,0,0,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}><SIcon name="arrow-l" size={16}/></button>
         {!recipe.isSeed && (
           <button type="button" onClick={onEdit} style={{
-            all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-            height: 40, padding: '0 4px', color: 'var(--ink)', fontSize: 13.5,
-          }}>
-            editar <SIcon name="edit" size={14}/>
-          </button>
+            all: 'unset', cursor: 'pointer', pointerEvents: 'auto',
+            position: 'absolute', top: 'max(12px, env(safe-area-inset-top, 12px))', right: 16,
+            width: 36, height: 36, borderRadius: '50%',
+            background: 'rgba(251, 246, 238, 0.9)', backdropFilter: 'blur(10px)',
+            boxShadow: '0 1px 6px rgba(0,0,0,0.15)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}><SIcon name="edit" size={14}/></button>
         )}
       </div>
-      <div>
-        <Photo tone={recipe.tone} ratio="4 / 3" image={recipe.photo} label={recipe.title} style={{ width: '100%' }}/>
-      </div>
+      <Photo tone={recipe.tone} ratio="4 / 3" image={recipe.photo} label={recipe.title} style={{ width: '100%' }}/>
 
       <div style={{ padding: '20px 20px 32px' }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>{(recipe.tags || []).join(' · ') || ' '}</div>
