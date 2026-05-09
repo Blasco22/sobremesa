@@ -160,6 +160,23 @@ function CookScreen({ recipe, onExit }) {
   const [timer, setTimer] = u2State(cur.timer ? cur.timer * 60 : null);
   const [running, setRunning] = u2State(false);
   const hiddenAt = u2Ref(null);
+  const wakeLock = u2Ref(null);
+
+  // Mantener pantalla encendida mientras se cocina
+  u2Effect(() => {
+    const acquire = async () => {
+      try {
+        if ('wakeLock' in navigator) wakeLock.current = await navigator.wakeLock.request('screen');
+      } catch {}
+    };
+    acquire();
+    const onVis2 = () => { if (!document.hidden) acquire(); };
+    document.addEventListener('visibilitychange', onVis2);
+    return () => {
+      wakeLock.current?.release().catch(() => {});
+      document.removeEventListener('visibilitychange', onVis2);
+    };
+  }, []);
 
   // Pedir permiso de notificación al entrar en modo cocina
   u2Effect(() => {
